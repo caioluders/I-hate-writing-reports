@@ -1,4 +1,12 @@
+import subprocess, shutil, sys
 import dearpygui.dearpygui as dpg
+
+def check_pandoc():
+	return shutil.which("pandoc")
+
+def run_pandoc(report_file , output_file ):
+	pandoc_output = subprocess.run(["pandoc",report_file,"-o",output_file,"--from","markdown+yaml_metadata_block+raw_html","--template","eisvogel","--table-of-contents","--toc-depth","6","--number-sections","--top-level-division=chapter","--highlight-style","breezedark"])
+	return pandoc_output
 
 def clear_intro() :
 	dpg.delete_item("open_btn")
@@ -32,15 +40,23 @@ def newr_btn_callback():
 def newt_btn_callback():
 	print("new template pressed") 
 
-with dpg.file_dialog(directory_selector=False, show=False, callback=open_btn_callback, id="file_dialog_id"):
-    dpg.add_file_extension(".*", color=(255, 255, 255, 255))
+def main() :
 
-with dpg.window(label="I Hate Writing Reports", autosize=True, id="main_window"):
-	dpg.add_text("I Hate Writing Reports")
-	dpg.add_button(label="Open" , callback=lambda: dpg.show_item("file_dialog_id"), id = "open_btn")
-	dpg.add_button(label="New Report" , callback = newr_btn_callback, id = "newr_btn")
-	dpg.add_button(label="New Template", callback=newt_btn_callback ,id = "newt_btn")
+	if check_pandoc() == None :
+		sys.exit("[!] Pandoc is required to run the program.")
+		
+	with dpg.file_dialog(directory_selector=False, show=False, callback=open_btn_callback, id="file_dialog_id"):
+	    dpg.add_file_extension(".*", color=(255, 255, 255, 255))
 
-dpg.set_primary_window("main_window", True)
+	with dpg.window(label="I Hate Writing Reports", autosize=True, id="main_window"):
+		dpg.add_text("I Hate Writing Reports")
+		dpg.add_button(label="Open" , callback=lambda: dpg.show_item("file_dialog_id"), id = "open_btn")
+		dpg.add_button(label="New Report" , callback = newr_btn_callback, id = "newr_btn")
+		dpg.add_button(label="New Template", callback=newt_btn_callback ,id = "newt_btn")
 
-dpg.start_dearpygui()
+	dpg.set_primary_window("main_window", True)
+
+	dpg.start_dearpygui()
+
+if __name__ == '__main__':
+	main()
